@@ -11,7 +11,6 @@ app.use(bodyParser.json());
 const port = /*process.env.PORT ||*/ 3000;
 
 app.post('/todos', (req, res) => {
-  console.log(req.body);
   //Create Todo model.
   var todo = new Todo({
     text: req.body.text
@@ -23,6 +22,16 @@ app.post('/todos', (req, res) => {
   }, (error) => {
     res.status(400).send(error);
   });
+
+});
+
+app.get('/todos', (req, res) => {
+  //get all todos
+  Todo.find().then((todos) => {
+    res.send({todos});
+  }, (error) => {
+    res.status(400).send(error);
+  })
 
 });
 

@@ -3,9 +3,20 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
+const todos = [{
+  text: 'First todo test'
+}, {
+  text: 'Second todo test'
+}];
+
 //Here we will run some code before every trst case
 beforeEach((done) => {
-  Todo.remove({}) //remove everything in the Todo collection inside the DB
+  //remove everything in the Todo collection inside the DB and insert seed data.
+  Todo.remove({})
+    .then(() => {
+      //done();
+      return Todo.insertMany(todos);
+    })
     .then(() => {
       done();
     })
@@ -27,7 +38,7 @@ describe('POST /todos', () => {
                 }
 
                 //Check if data was really saved into the DB.
-                Todo.find().then((todos) => {
+                Todo.find({text}).then((todos) => {
                   expect(todos.length).toBe(1);
                   expect(todos[0].text).toBe(text);
                   done();
@@ -50,7 +61,8 @@ describe('POST /todos', () => {
               }
 
               Todo.find().then((todos) => {
-                expect(todos.length).toBe(0);
+                //should only find 2 documents in the DB (from todos array)
+                expect(todos.length).toBe(2);
                 done();
               })
               .catch((e) => {//catch any error that might occur right above.
@@ -58,4 +70,18 @@ describe('POST /todos', () => {
               })
           });
     });
+});
+
+
+describe('GET /todos', () => {
+  it('should get all todos', (done) => {
+    request(app)
+        .get('/todos')
+        .expect(200) //status code of http request
+        .expect((res) => {
+          //should only find 2 documents in the DB (from todos array)
+          expect(res.body.todos.length).toBe(2);
+        })
+        .end(done);
+  });
 });

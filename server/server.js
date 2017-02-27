@@ -27,5 +27,8 @@ app.post('/todos', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log('Server listening to port ' + port)
+  console.log('Server listening to port ' + port);
 });
+
+//Everything in this file will be needed in server.test.js
+module.exports = {app};

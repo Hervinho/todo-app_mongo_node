@@ -90,12 +90,13 @@ describe('GET /todos', () => {
 });
 
 describe('GET /todos/:id', () => {
+  var id = todos[0]._id.toHexString();
   it('should get a single todo doc', (done) => {
     request(app)
-        .get('/todos/' + todos[0]._id.toHexString()) //.toHexString() converts ObjectID to string
+        .get('/todos/' + id) //.toHexString() converts ObjectID to string
         .expect(200) //status code of http request
         .expect((res) => {
-          //should only find 1 documents in the DB (from todos array)
+          //text should be the same
           expect(res.body.todo.text).toBe(todos[0].text);
         })
         .end(done);
@@ -109,9 +110,56 @@ describe('GET /todos/:id', () => {
         .end(done);
   });
 
-  it('should return 400 for non-object ids', (done) => {
+  it('should return 400 for non ObjectIDs', (done) => {
     request(app)
         .get('/todos/123avf')
+        .expect(400) //status code of http request
+        .end(done);
+  });
+
+});
+
+describe('DELETE /todos/:id', () => {
+  it('should remove a single todo doc', (done) => {
+    var id = todos[1]._id.toHexString();
+    request(app)
+        .delete('/todos/' + id)
+        .expect(200) //status code of http request
+        .expect((res) => {
+          //id of deleted document must be the same as todo[1]
+          expect(res.body.todo.id).toBe(todos[1].id);
+        })
+        .end((err, res) => {
+            if(err){
+              return done(err);
+            }
+
+            Todo.findById(id).then((todo) => {
+              //should not find todo coz it has been removed
+              expect(todo).toNotExist();
+              done();
+            })
+            .catch((e) => {//catch any error that might occur right above.
+              done(e);
+            })
+        });
+  });
+
+  it('should return 404 if todo not found', (done) => {
+    var id = new ObjectID().toHexString();
+    request(app)
+        .delete('/todos/' + id)
+        .expect(404) //status code of http request
+        .expect((res) => {
+          //deleted document must not exits
+          expect(res.body.todo).toNotExist();
+        })
+        .end(done);
+  });
+
+  it('should return 400 for non ObjectIDs', (done) => {
+    request(app)
+        .delete('/todos/_ui3u3uehehhd')
         .expect(400) //status code of http request
         .end(done);
   });

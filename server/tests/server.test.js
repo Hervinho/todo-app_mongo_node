@@ -9,7 +9,9 @@ const todos = [{
   text: 'First todo test'
 }, {
   _id: new ObjectID(),
-  text: 'Second todo test'
+  text: 'Second todo test',
+  completed: true,
+  completedAt: 20170228
 }];
 
 //Here we will run some code before every trst case
@@ -161,6 +163,57 @@ describe('DELETE /todos/:id', () => {
     request(app)
         .delete('/todos/_ui3u3uehehhd')
         .expect(400) //status code of http request
+        .end(done);
+  });
+
+});
+
+describe('PATCH /todos:id', () => {
+  it('should update the todo', (done) => {
+    var id = todos[0]._id.toHexString();
+    var text = 'New text';
+
+    request(app)
+        .patch('/todos/' + id)
+        .send({
+          completed: true,
+          text: text
+        })
+        .expect(200) //status code of http request
+        .expect((res) => {
+          //Text must be changed
+          expect(res.body.todo.text).toBe(text);
+
+          //completed must be changed to true
+          expect(res.body.todo.completed).toBe(true);
+
+          //completedAt must be a number, cfr app.patch in server.js file
+          expect(res.body.todo.completedAt).toBeA('number');
+        })
+        .end(done);
+  });
+
+  it('should nullify completedAt when todo is not completed', (done) => {
+    var id = todos[1]._id.toHexString();
+    var text = 'New text for second item';
+
+    request(app)
+        .patch('/todos/' + id)
+        .send({
+          completed: false,
+          text: text
+        })
+        .expect(200) //status code of http request
+        .expect((res) => {
+          //Text must be changed
+          expect(res.body.todo.text).toBe(text);
+
+          //completed must be changed to false
+          expect(res.body.todo.completed).toBe(false);
+
+          //completedAt must be null, cfr app.patch in server.js file
+          expect(res.body.todo.completedAt).toNotExist();
+        })
         .end(done);
   });
 

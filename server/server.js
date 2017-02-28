@@ -55,6 +55,26 @@ app.get('/todos/:id', (req, res) => {
   }
 });
 
+//delete a single todo
+app.delete('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  if( !ObjectID.isValid(id) ){
+    res.status(400).send({response: 'Id not valid'});
+  }
+  else{
+    Todo.findByIdAndRemove(id).then((todo) => {
+      if(!todo){
+        res.status(404).send({response: 'Todo not found'});
+      }
+      else{
+        res.status(200).send({todo});
+      }
+    }, (error) => {
+      res.status(400).send(error);
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log('Server listening to port ' + port);
 });

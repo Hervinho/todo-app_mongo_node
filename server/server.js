@@ -1,144 +1,117 @@
+require('./config/config');
+
 const _ = require('lodash');
-const {
-    ObjectID
-} = require('mongodb'); //get ObjectID from mongodb library
 const express = require('express');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
-var {
-    mongoose
-} = require('./db/mongoose');
-var {
-    Todo
-} = require('./models/todo');
-var {
-    user
-} = require('./models/user');
+var {mongoose} = require('./db/mongoose');
+var {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 
 var app = express();
+const port = process.env.PORT;
+
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 3000;
-
-//create todo
 app.post('/todos', (req, res) => {
-    //Create Todo model.
-    var todo = new Todo({
-        text: req.body.text
-    });
+  var todo = new Todo({
+    text: req.body.text
+  });
 
-    //Save into the DB
-    todo.save().then((doc) => {
-        res.send(doc);
-    }, (error) => {
-        res.status(400).send(error);
-    });
-
+  todo.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
-//get all todos
 app.get('/todos', (req, res) => {
-    Todo.find().then((todos) => {
-        res.send({
-            todos
-        });
-    }, (error) => {
-        res.status(400).send(error);
-    })
-
+  Todo.find().then((todos) => {
+    res.send({todos});
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
-//get a single todo
 app.get('/todos/:id', (req, res) => {
-    var id = req.params.id;
-    if (!ObjectID.isValid(id)) {
-        res.status(400).send({
-            response: 'Id not valid'
-        });
-    } else {
-        Todo.findById(id).then((todo) => {
-            if (!todo) {
-                res.status(404).send({
-                    response: 'Todo not found'
-                });
-            }
-            res.status(200).send({
-                todo
-            });
-        }, (error) => {
-            res.status(400).send(error);
-        });
+  var id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Todo.findById(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
     }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
 });
 
-//delete a single todo
 app.delete('/todos/:id', (req, res) => {
-    var id = req.params.id;
-    if (!ObjectID.isValid(id)) {
-        res.status(400).send({
-            response: 'Id not valid'
-        });
-    } else {
-        Todo.findByIdAndRemove(id).then((todo) => {
-            if (!todo) {
-                res.status(404).send({
-                    response: 'Todo not found'
-                });
-            } else {
-                res.status(200).send({
-                    todo
-                });
-            }
-        }, (error) => {
-            res.status(400).send(error);
-        });
+  var id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Todo.findByIdAndRemove(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
     }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
 });
 
-//update a todo using PATCH
 app.patch('/todos/:id', (req, res) => {
-    var id = req.params.id;
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
 
-    //_.pick lets you choose only specifieded properties from a http request.
-    var body = _.pick((req.body), ['text', 'completed']);
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
 
-    if (!ObjectID.isValid(id)) {
-        return res.status(400).send({
-            response: 'Id not valid'
-        });
-    } else {
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
 
-        if (_.isBoolean(body.completed) && body.completed) {
-            body.completedAt = new Date().getTime();
-        } else {
-            body.completedAt = null;
-            body.completed = false;
-        }
-
-        Todo.findByIdAndUpdate(id, {$set: body}, {
-          new: true //will return the updated object.
-        }).then((todo) => {
-          if (!todo) {
-              res.status(404).send({
-                  response: 'Todo not found'
-              });
-          }
-          else {
-             res.status(200).send({
-                 todo
-             });
-         }
-        }).catch((e) => {
-          res.status(400).send();
-        });
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
     }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
+// POST /users
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
 });
 
 app.listen(port, () => {
-    console.log('Server listening to port ' + port);
+  console.log(`Started up at port ${port}`);
 });
 
-//Everything in this file will be needed in server.test.js
-module.exports = {
-    app
-};
+module.exports = {app};

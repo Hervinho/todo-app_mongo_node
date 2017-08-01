@@ -15,7 +15,8 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
      //writers: ["You", "Jane Doe", "Aliens"]//exact match in the array
      //writers: "Jane Doe" //anything that matches (even partially)
      //"writers.0": "You" //only matching with first element of the array
-     duration: {$gt: 50} // $gt means >
+     writers: {$in: ["Me", "Aliens"]}
+     //duration: {$gt: 50, $lte: 150} // $lt = <, $lte: <= . > 50 and < 150
   }).toArray().then((docs) => {
      console.log('Todos');
      console.log(JSON.stringify(docs, undefined, 2));

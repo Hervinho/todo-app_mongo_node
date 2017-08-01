@@ -10,7 +10,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   //find all
   db.collection('Todos').find({
      //_id: new ObjectID('57bb36afb3b6a3801d8c479d'), completed: false
-     text: {$regex: /^hello/} //using regex operator
+     //text: {$regex: /^hello/} //using regex operator
      //'details.time': '10.00 am'
      //writers: ["You", "Jane Doe", "Aliens"]//exact match in the array
      //writers: "Jane Doe" //anything that matches (even partially)
@@ -20,6 +20,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
      //"details.time": {$exists: false} //check if that field exists/true or notfalse
      //$or: [{"details.time": {$exists: false}}, {duration: {$gt: 50, $lte: 150}}] //OR operator
      //$and: [{"details.time": {$exists: false}}, {duration: {$eq: 10}}]
+     writers: {$size: 3} //match with array size
   }).toArray().then((docs) => {
      console.log('Todos');
      console.log(JSON.stringify(docs, undefined, 2));

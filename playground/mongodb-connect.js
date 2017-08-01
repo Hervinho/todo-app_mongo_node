@@ -8,7 +8,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   console.log('Connected to MongoDB server');
 
   //find all
-  db.collection('Todos').find({
+  /*db.collection('Todos').find({
      //_id: new ObjectID('57bb36afb3b6a3801d8c479d'), completed: false
      //text: {$regex: /^hello/} //using regex operator
      //'details.time': '10.00 am'
@@ -26,7 +26,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
      console.log(JSON.stringify(docs, undefined, 2));
    }, (err) => {
      console.log('Unable to fetch todos', err);
-  });
+  });*/
 
   //find all and count.
   /*db.collection('Todos').find().count().then((count) => {
@@ -74,6 +74,22 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   
      console.log('Inserted');
    });*/
+
+  //find one and update
+  db.collection('Todos').findOneAndUpdate({
+    _id: new ObjectID('5980563bb3acd90be0da2ebf')
+  }, {
+    $set: {
+      text: 'Second bath of the day'
+    },
+    $inc: {
+      duration: 10
+    }
+  }, {
+    returnOriginal: false
+  }).then((result) => {
+    console.log(result);
+  });
 
   db.close();
 });

@@ -14,7 +14,8 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
      //'details.time': '10.00 am'
      //writers: ["You", "Jane Doe", "Aliens"]//exact match in the array
      //writers: "Jane Doe" //anything that matches (even partially)
-     "writers.0": "You" //only matching with first element of the array
+     //"writers.0": "You" //only matching with first element of the array
+     duration: {$gt: 50} // $gt means >
   }).toArray().then((docs) => {
      console.log('Todos');
      console.log(JSON.stringify(docs, undefined, 2));
@@ -47,12 +48,19 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   //Insert many
   /*db.collection('Todos').insertMany([
     {
-     text: 'hello wolr',
-     completed: false
+     text: 'bath',
+     completed: false,
+     duration: 15
     },
     {
-     text: 'hiii',
-     completed: false
+     text: 'dress up',
+     completed: false,
+     duration: 10
+    },
+    {
+     text: 'gym',
+     completed: false,
+     duration: 100
     }
   ], (err, result) => {
      if (err) {

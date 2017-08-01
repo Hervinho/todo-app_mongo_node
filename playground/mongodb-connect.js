@@ -17,7 +17,9 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
      //"writers.0": "You" //only matching with first element of the array
      //writers: {$in: ["Me", "Aliens"]}
      //duration: {$gt: 50, $lte: 150} // $lt = <, $lte: <= . > 50 and < 150
-     "details.time": {$exists: false} //check if that field exists/true or notfalse
+     //"details.time": {$exists: false} //check if that field exists/true or notfalse
+     //$or: [{"details.time": {$exists: false}}, {duration: {$gt: 50, $lte: 150}}] //OR operator
+     $and: [{"details.time": {$exists: false}}, {duration: {$eq: 10}}]
   }).toArray().then((docs) => {
      console.log('Todos');
      console.log(JSON.stringify(docs, undefined, 2));

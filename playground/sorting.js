@@ -7,11 +7,11 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Connected to MongoDB server');
 
-  var query = {'details.time': '10.00 am'};
-  var projection = {"text": 1, "completed": 1, "_id": 0}; //setting fields to 1 means that's the only field we will use.
+  var query = {'duration': {$exists: true}};
 
   //using cursors to stream data instead of consuming everything at once.
-  var cursor = db.collection('Todos').find(query, projection);
+  var cursor = db.collection('Todos').find(query);
+  cursor.sort({"duration": 1}); //sort by ascending order.
 
   cursor.forEach(
     (doc) => {

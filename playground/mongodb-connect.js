@@ -7,6 +7,22 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Connected to MongoDB server');
 
+  //using cursors to stream data instead of consuming everything at once.
+  var query = {'details.time': '10.00 am'};
+  var cursor = db.collection('Todos').find(query);
+
+  cursor.forEach(
+    (doc) => {
+      console.log('Todos');
+      console.log(JSON.stringify(doc, undefined, 2));
+    },
+    (err) => {
+      if(err != null){
+        console.log('Unable to fetch todos', err);
+      }
+    }
+  );
+
   //find all
   /*db.collection('Todos').find({
      //_id: new ObjectID('57bb36afb3b6a3801d8c479d'), completed: false
@@ -76,7 +92,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
    });*/
 
   //find one and update
-  db.collection('Todos').findOneAndUpdate({
+  /*db.collection('Todos').findOneAndUpdate({
     _id: new ObjectID('5980563bb3acd90be0da2ebf')
   }, {
     $set: {
@@ -89,7 +105,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
     returnOriginal: false
   }).then((result) => {
     console.log(result);
-  });
+  });*/
 
   db.close();
 });
